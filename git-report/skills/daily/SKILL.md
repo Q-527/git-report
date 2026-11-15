@@ -38,7 +38,7 @@ disable-model-invocation: false
 ## 3. 解析与分组
 - 约定式提交：取 message 首个 `:` 前的词作为 type（feat/fix/docs/style/refactor/perf/test/build/ci/chore/revert）。命中已知 type 归入该类；否则归入"其他"。
 - 排除：type 出现在 `excludeTypes` 中则跳过（不计入报告）。
-- 工单聚合（`groupBy==="ticket"`）：用 `ticketPattern` 从 message 抽取工单号，按工单分组；无工单的归入"未关联工单"。
+- 工单聚合（`groupBy==="ticket"`）：用 `ticketPattern` 从 message 抽取工单号，按工单分组；无工单的归入"未关联工单"。若配置了 `ticketUrlTemplate`，把工单号渲染成 Markdown 链接；用户额外要求真实标题且环境可用 github MCP / gh 时再解析（见 `issues` 技能）。
 - 作者分组（`groupBy==="author"`）：按作者（显示名）分组。
 - emoji：`emoji=true` 时各组标题加对应图标（✨feat 🐛fix 📝docs ♻️refactor ⚡perf ✅test 🔧chore 🔥revert/remove）。
 

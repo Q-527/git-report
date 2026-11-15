@@ -1,10 +1,10 @@
 {
   "name": "git-report",
-  "description": "从 git 提交记录一键生成中文/英文工作日报/周报/月报/自定义区间报告/团队周报/跨仓库看板，并能生成 CHANGELOG/Release Notes、建议语义化版本号、分析提交节奏、反向写约定式提交信息或生成 PR 描述。支持 .git-report.json 配置、约定式提交解析、工单聚合、贡献者统计、排除生成目录、中英双语、自动落盘、周五自动提醒钩子与 GitHub Action 自动周报。纯本地、只读、显式确认，绝不自动推送",
-  "version": "1.4.0",
+  "description": "从 git 提交记录一键生成中文/英文工作日报/周报/月报/自定义区间报告/团队周报/跨仓库看板，并能生成 CHANGELOG/Release Notes、建议语义化版本号、分析提交节奏、读取真实 diff 做逻辑摘要、解析工单标题、推送周报到飞书/钉钉/Slack、做仓库安全卫生审计，以及反向写约定式提交信息或生成 PR 描述。支持 .git-report.json 配置、约定式提交解析、工单聚合、贡献者统计、排除生成目录、中英双语、自动落盘、周五自动提醒钩子与 GitHub Action 自动周报。纯本地、只读、显式确认，绝不自动推送",
+  "version": "1.5.0",
   "author": {
     "name": "宝宝 (Q-527)"
   },
   "license": "MIT",
-  "keywords": ["git", "report", "chinese", "english", "standup", "周报", "日报", "月报", "team", "dashboard", "changelog", "commit", "pr", "version", "semver", "stats", "release-notes", "conventional-commits", "range", "github-action"]
+  "keywords": ["git", "report", "chinese", "english", "standup", "周报", "日报", "月报", "team", "dashboard", "changelog", "commit", "pr", "version", "semver", "stats", "audit", "secret-scan", "diff", "notify", "feishu", "dingtalk", "slack", "release-notes", "conventional-commits", "range", "github-action"]
 }

@@ -22,6 +22,8 @@ disable-model-invocation: true
   "excludeTypes": ["chore", "style", "docs"],
   "excludePaths": ["node_modules", "dist", "build", ".next", "out", "vendor", "target", "*.min.js", "*.min.css", "package-lock.json", "yarn.lock", "pnpm-lock.yaml", "*.lock"],
   "ticketPattern": "([A-Z]{2,}-\\d+)",
+  "ticketUrlTemplate": "",
+  "notify": { "feishu": "", "dingtalk": "", "slack": "" },
   "emoji": true,
   "members": {},
   "output": { "enabled": false, "dir": ".reports", "format": "md" },
@@ -38,6 +40,8 @@ disable-model-invocation: true
 | `excludeTypes` | 字符串数组 | 这些约定式类型不计入报告（如杂务、样式、文档） |
 | `excludePaths` | 字符串数组 | 变更文件统计时排除的路径/目录/ glob（如 `node_modules`、`dist`、`*.lock`）；也支持在 `git-report:range` / 周期报告里让"变更文件数"更准确 |
 | `ticketPattern` | 正则字符串 | 从 commit message 抽取工单号的正则，用于按工单聚合 |
+| `ticketUrlTemplate` | 字符串 | 工单号渲染链接模板，如 `https://github.com/Q-527/foo/issues/{ticket}` 或 Jira `https://x.atlassian.net/browse/{ticket}` |
+| `notify` | `{ feishu, dingtalk, slack }` | 三个群机器人的 webhook 地址（也可改用环境变量 `FEISHU_WEBHOOK` 等，避免写入仓库） |
 | `emoji` | 布尔 | 分组标题是否加 emoji 图标 |
 | `members` | `{ git名: 显示名 }` | 把 git 作者名映射成更好看的中文名 |
 | `output.enabled` | 布尔 | 是否自动把报告写成文件 |

@@ -27,6 +27,10 @@
 - **版本号建议**：`/git-report:version` 依据约定式提交自动建议 major/minor/patch，与 Changelog 联动
 - **提交节奏分析**：`/git-report:stats` 刻画最忙星期几/时段、最长连续提交 streak、人均产出
 - **GitHub Action 自动周报**：内置 `.github/workflows/weekly-report.yml`，周五自动开周报 Issue
+- **Diff 感知摘要**：`/git-report:diff` 读取真实代码 diff（而非仅 commit message）总结"改了什么逻辑、影响哪些模块、有何风险"；高成本，默认仅手动触发
+- **工单联动**：`/git-report:issues` 把工单号渲染成可点击链接，环境可用时（github MCP / gh）解析真实标题，无需 token 时退化为纯链接
+- **群推送**：`/git-report:notify` 把报告发到飞书/钉钉/Slack，发送前预览并确认，webhook 来自配置或环境变量
+- **安全卫生审计**：`/git-report:audit` 检测被跟踪的大文件、疑似泄露的密钥（遮蔽展示）、不该被跟踪的生成目录、超长提交
 
 ## 安装
 
@@ -61,8 +65,12 @@ claude plugin marketplace add https://github.com/Q-527/git-report
 | `/git-report:dashboard` | 跨仓库看板，一条命令总览所有项目本周进度 |
 | `/git-report:version` | 依据约定式提交建议语义化版本号（major/minor/patch） |
 | `/git-report:stats` | 提交节奏分析：最忙星期几/时段、连续提交 streak、人均产出 |
+| `/git-report:diff` | 读取真实 diff 总结改动逻辑与风险（高成本，仅手动触发） |
+| `/git-report:issues` | 工单号渲染链接 / 解析真实标题（Issue/Jira 联动） |
+| `/git-report:notify` | 把报告推送到飞书/钉钉/Slack（需先配置 webhook，发送前确认） |
+| `/git-report:audit` | 仓库安全卫生审计：大文件/疑似密钥/超长提交 |
 
-也支持自然语言触发，例如"帮我写个这周的周报""总结一下这个月干了啥""给这次改动写个提交信息""上个月 1 号到 15 号我干了啥""给这个分支写个 PR 描述""把 A、B、C 三个项目这周的进度汇总一下""这次该发几版本""我最近三个月提交节奏怎么样"。
+也支持自然语言触发，例如"帮我写个这周的周报""总结一下这个月干了啥""给这次改动写个提交信息""上个月 1 号到 15 号我干了啥""给这个分支写个 PR 描述""把 A、B、C 三个项目这周的进度汇总一下""这次该发几版本""我最近三个月提交节奏怎么样""总结一下这个 commit 实际改了什么""帮我把周报发到飞书群""检查一下仓库有没有泄露密钥"。
 指定多个仓库时，直接说"把 A、B、C 三个项目这周的提交汇总一下"即可。
 
 ## 配置
@@ -76,6 +84,8 @@ claude plugin marketplace add https://github.com/Q-527/git-report
   "excludeTypes": ["chore", "style", "docs"],
   "excludePaths": ["node_modules", "dist", "build", ".next", "out", "vendor", "target", "*.min.js", "*.min.css", "package-lock.json", "yarn.lock", "pnpm-lock.yaml", "*.lock"],
   "ticketPattern": "([A-Z]{2,}-\\d+)",
+  "ticketUrlTemplate": "",
+  "notify": { "feishu": "", "dingtalk": "", "slack": "" },
   "emoji": true,
   "members": { "anann": "宝宝" },
   "output": { "enabled": false, "dir": ".reports", "format": "md" },
@@ -91,6 +101,8 @@ claude plugin marketplace add https://github.com/Q-527/git-report
 | `excludeTypes` | 数组 | 这些约定式类型不计入报告 |
 | `excludePaths` | 数组 | 变更文件统计时排除的路径/目录/glob（如 `node_modules`、`dist`、`*.lock`） |
 | `ticketPattern` | 正则字符串 | 从 commit message 抽取工单号 |
+| `ticketUrlTemplate` | 字符串 | 工单号渲染链接模板，如 `https://github.com/Q-527/foo/issues/{ticket}` 或 Jira `https://x.atlassian.net/browse/{ticket}` |
+| `notify` | `{ feishu, dingtalk, slack }` | 三个群机器人的 webhook 地址（也可改用环境变量 `FEISHU_WEBHOOK` 等，避免写入仓库） |
 | `emoji` | 布尔 | 分组标题是否加 emoji |
 | `members` | `{ git名: 显示名 }` | 作者名映射 |
 | `output.enabled` | 布尔 | 是否自动写成文件 |
@@ -121,7 +133,9 @@ git-report 是**只读 + 显式确认**的插件，详见仓库根 `SAFETY.md`�
 
 - 不自动 `git push`、不创建/强推分支、不 `git reset --hard`、不丢弃未提交改动。
 - `commit` 只用已暂存内容、不绕过 pre-commit 钩子；`pr` 只生成文本、不代为创建 PR。
-- 不联网、不调用 MCP、不上传你的代码或报告。
+- `audit` / `secret-scan` 纯本地只读，发现疑似密钥时**只报告文件:行号:类型，绝不输出密钥真实值**。
+- `notify` 是唯一会联网的动作：仅在用户当次明确确认后，向**用户自己配置的** webhook 发一次 POST；webhook 地址不写入任何文件或记忆。
+- 其余报告/分析类技能均不联网、不调用 MCP、不上传你的代码或报告。
 
 ## 许可证
 
