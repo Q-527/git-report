@@ -1,0 +1,7 @@
+{
+  "name": "git-report-marketplace",
+  "description": "git-report：从 git 提交生成中文工作日报/周报/月报",
+  "plugins": [
+    { "name": "git-report", "source": "./git-report" }
+  ]
+}

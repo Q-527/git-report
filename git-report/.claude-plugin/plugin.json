@@ -1,0 +1,10 @@
+{
+  "name": "git-report",
+  "description": "从 git 提交记录一键生成中文工作日报/周报/月报，支持多仓库聚合、按模块汇总，零配置",
+  "version": "1.0.0",
+  "author": {
+    "name": "宝宝 (Q-527)"
+  },
+  "license": "MIT",
+  "keywords": ["git", "report", "chinese", "standup", "周报", "日报", "月报"]
+}
