@@ -12,6 +12,7 @@
 - **里程碑分组**：`groupBy: "milestone"` 按版本聚合——优先用 git tag，无 tag 时从 commit message 抽 `vX.Y.Z` 当边界。专门解决"项目全用版本号提交、type 分组变成发版流水账"的痛点
 - **贡献者统计**：月报自动出"贡献榜"，并支持把 git 作者名映射成中文显示名
 - **中英双语**：同一份报告可出中文、英文、或中英双语
+- **详细报告（默认 rich）**：日报/周报/月报默认出"详细模式"——不再只是罗列 commit message，而是含**每日节奏表**（每天提交/增删行/涉及文件）、**提交明细**（每条提交逐文件的新增/删除行数）、**改动最大的文件 Top N**、**文件类型分布**，外加按组进展、风险与下期建议；可用 `detail: "normal"` 退回精简版
 - **多仓库聚合**：同时维护多个项目时，一次汇总所有仓库
 - **自动落盘**：可一键把报告写成 Markdown 文件
 - **周五自动提醒**：装好后在周五打开仓库，会温柔提示"要不要写周报"（可关）
@@ -89,6 +90,7 @@ claude plugin marketplace add https://github.com/Q-527/git-report
   "milestonePattern": "v\\d+\\.\\d+\\.\\d+",
   "notify": { "feishu": "", "dingtalk": "", "slack": "" },
   "emoji": true,
+  "detail": "rich",
   "members": { "anann": "宝宝" },
   "output": { "enabled": false, "dir": ".reports", "format": "md" },
   "repos": [],
@@ -107,6 +109,7 @@ claude plugin marketplace add https://github.com/Q-527/git-report
 | `milestonePattern` | 正则字符串 | 里程碑分组时从 commit message 抽取版本号的 pattern，默认 `v\d+\.\d+\.\d+` |
 | `notify` | `{ feishu, dingtalk, slack }` | 三个群机器人的 webhook 地址（也可改用环境变量 `FEISHU_WEBHOOK` 等，避免写入仓库） |
 | `emoji` | 布尔 | 分组标题是否加 emoji |
+| `detail` | `rich` / `normal` | 报告详细程度；`rich`（默认）含每日节奏表、提交明细（逐文件增删行）、改动榜 Top N、文件类型分布；`normal` 仅概览+提交明细+分组+建议 |
 | `members` | `{ git名: 显示名 }` | 作者名映射 |
 | `output.enabled` | 布尔 | 是否自动写成文件 |
 | `output.dir` | 路径 | 报告存放目录 |

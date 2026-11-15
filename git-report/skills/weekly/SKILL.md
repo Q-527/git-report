@@ -13,13 +13,18 @@ disable-model-invocation: false
 ## 1. 范围
 本周一 00:00 到 now。周一日期：`date -d "last monday" +%Y-%m-%d`（Git Bash）；若今天就是周一则取今天。除非用户给了别的区间，否则不追问直接本周。
 
-## 2. 收集数据
+## 2. 收集数据（富数据模式）
 默认当前目录；多仓库时逐个 `git -C <p> rev-parse --is-inside-work-tree` 校验。
-对每个仓库：
-- 提交列表：`git -C <p> log --since="<周一> 00:00" --until="now" --pretty=format:"%h|%an|%ad|%s" --date=short`
-- 变更文件（已排除生成目录/锁定文件）：`node ${CLAUDE_PLUGIN_ROOT}/scripts/changed-files.mjs --repo <p> --since "<周一> 00:00" --until "now"`，读 `count` 与 `files`。
-聚合；每条记 hash、作者（members 映射）、日期、message、变更文件数。
-若全无提交：如实说"本周暂无提交记录"，不编造，结束。
+对每个仓库运行插件的富数据统计脚本（一次性给出提交、逐文件增删行、按天节奏、文件类型分布、Top 改动文件）：
+`node ${CLAUDE_PLUGIN_ROOT}/scripts/repo-stats.mjs --repo <p> --since "<周一> 00:00" --until "now"`
+读取返回的 JSON：
+- `commits[]`：每条含 hash、author、date、subject、type、files[{path,add,del}]、add、del、fileCount
+- `files[]`：Top 改动文件（按 add+del 排序），含 add/del/total
+- `fileTypeBreakdown`：按文件类型统计 文件数/新增/删除
+- `byDay`：每天 提交数/新增/删除/涉及文件数
+- `totals`：commits/files/add/del/authors
+（changed-files.mjs 仍保留作兜底；repo-stats 不可用时退用它拿 count/files）
+把 `members` 映射套到 author 上；若 `totals.commits===0`：如实说"本周暂无提交记录"，不编造，结束。
 
 ## 2.5 预处理（日报/周报/月报通用）
 - 收集前先 `git -C <p> status --porcelain` 检查未提交改动；若有，在报告开头温和提示"当前还有 N 个未提交改动，可能未计入本次报告"。
@@ -29,9 +34,10 @@ disable-model-invocation: false
 ## 3. 解析与分组
 与 `daily` 相同：约定式 type 归类、excludeTypes 排除、ticket/author/chronological/**milestone** 分组、emoji 前缀。其中 `milestone` 分组调用 `scripts/milestones.mjs`（优先 git tag，无 tag 时退化到 commit message 里的 `vX.Y.Z`），专门应对"一周内多次版本化提交、type 分组失效"的场景。
 
-## 4. 生成报告
-交给 `git-report:report-writer` 子代理（或简单场景直接生成）。
-报告含：标题（工作周报 YYYY-MM-DD，标注周一到周日）、概览（N 提交 / M 文件 / K 作者）、按组进展（通顺中文，不堆原文）、风险/卡点、下周计划（可选）。
+## 4. 生成报告（详细模式）
+把 §2 的完整 JSON + 配置（language / groupBy / detail / members / excludeTypes）交给 `git-report:report-writer` 子代理，要求按"详细模式"排版（见 report-writer 模板：概览 + 每日节奏表 + 提交明细 + 改动榜 + 类型分布 + 分组 + 风险 + 下周建议）。
+`detail` 配置为 `normal` 时，子代理省略"每日节奏表 / 改动榜 / 类型分布"三张表，只保留概览 + 提交明细 + 分组 + 建议；默认 `rich` 出全量。
+简单场景也可直接生成，但须保持同样的详细结构。
 
 ## 5. 语言
 按 `cfg.language`：en 英文；both 中英双语；默认中文。

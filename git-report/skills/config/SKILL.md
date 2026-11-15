@@ -26,6 +26,7 @@ disable-model-invocation: true
   "milestonePattern": "v\\d+\\.\\d+\\.\\d+",
   "notify": { "feishu": "", "dingtalk": "", "slack": "" },
   "emoji": true,
+  "detail": "rich",
   "members": {},
   "output": { "enabled": false, "dir": ".reports", "format": "md" },
   "repos": [],
@@ -45,6 +46,7 @@ disable-model-invocation: true
 | `milestonePattern` | 正则字符串 | 里程碑分组时从 commit message 抽取版本号的 pattern，默认 `v\d+\.\d+\.\d+` |
 | `notify` | `{ feishu, dingtalk, slack }` | 三个群机器人的 webhook 地址（也可改用环境变量 `FEISHU_WEBHOOK` 等，避免写入仓库） |
 | `emoji` | 布尔 | 分组标题是否加 emoji 图标 |
+| `detail` | `rich` / `normal` | 报告详细程度；`rich`（默认）含每日节奏表、提交明细（逐文件增删行）、改动榜 Top N、文件类型分布；`normal` 仅概览+提交明细+分组+建议，更精简 |
 | `members` | `{ git名: 显示名 }` | 把 git 作者名映射成更好看的中文名 |
 | `output.enabled` | 布尔 | 是否自动把报告写成文件 |
 | `output.dir` | 路径 | 报告文件存放目录，默认 `.reports` |

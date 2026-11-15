@@ -12,13 +12,18 @@ disable-model-invocation: false
 ## 1. 范围
 本月 1 号 00:00 到 now。月初：`date +%Y-%m-01`。除非用户给了别的区间，否则不追问直接本月。
 
-## 2. 收集数据
+## 2. 收集数据（富数据模式）
 默认当前目录；多仓库时逐个 `git -C <p> rev-parse --is-inside-work-tree` 校验。
-对每个仓库：
-- 提交列表：`git -C <p> log --since="<月初> 00:00" --until="now" --pretty=format:"%h|%an|%ad|%s" --date=short`
-- 变更文件（已排除生成目录/锁定文件）：`node ${CLAUDE_PLUGIN_ROOT}/scripts/changed-files.mjs --repo <p> --since "<月初> 00:00" --until "now"`，读 `count` 与 `files`。
-聚合；每条记 hash、作者（members 映射）、日期、message、变更文件数。
-若全无提交：如实说"本月暂无提交记录"，不编造，结束。
+对每个仓库运行插件的富数据统计脚本（一次性给出提交、逐文件增删行、按天节奏、文件类型分布、Top 改动文件）：
+`node ${CLAUDE_PLUGIN_ROOT}/scripts/repo-stats.mjs --repo <p> --since "<月初> 00:00" --until "now"`
+读取返回的 JSON：
+- `commits[]`：每条含 hash、author、date、subject、type、files[{path,add,del}]、add、del、fileCount
+- `files[]`：Top 改动文件（按 add+del 排序），含 add/del/total
+- `fileTypeBreakdown`：按文件类型统计 文件数/新增/删除
+- `byDay`：每天 提交数/新增/删除/涉及文件数
+- `totals`：commits/files/add/del/authors
+（changed-files.mjs 仍保留作兜底；repo-stats 不可用时退用它拿 count/files）
+把 `members` 映射套到 author 上；若 `totals.commits===0`：如实说"本月暂无提交记录"，不编造，结束。
 
 ## 2.5 预处理（日报/周报/月报通用）
 - 收集前先 `git -C <p> status --porcelain` 检查未提交改动；若有，在报告开头温和提示"当前还有 N 个未提交改动，可能未计入本次报告"。
@@ -34,9 +39,10 @@ disable-model-invocation: false
 - 用 `git -C <p> shortlog -sn --since="<月初>"` 交叉验证作者提交数。
 - 若仅一位作者则可省略榜单，只在概览点出。
 
-## 5. 生成报告
-交给 `git-report:report-writer` 子代理（或简单场景直接生成）。
-报告含：标题（工作月报 YYYY-MM）、概览（N 提交 / M 文件 / K 作者）、本月亮点/里程碑、按组进展（通顺中文，不堆原文）、贡献者榜单、风险/遗留问题、下月计划（可选）。
+## 5. 生成报告（详细模式）
+把 §2 的完整 JSON + 配置（language / groupBy / detail / members / excludeTypes）交给 `git-report:report-writer` 子代理，要求按"详细模式"排版（见 report-writer 模板：概览 + 每日节奏表 + 提交明细 + 改动榜 + 类型分布 + 分组 + 贡献者 + 风险 + 下月建议）。月报在"按组进展"之后额外插入"贡献者榜单"（每位作者提交数/新增/删除/主要模块），用 §4 的 shortlog 交叉验证。
+`detail` 配置为 `normal` 时，子代理省略"每日节奏表 / 改动榜 / 类型分布"三张表，只保留概览 + 提交明细 + 分组 + 贡献者 + 建议；默认 `rich` 出全量。
+简单场景也可直接生成，但须保持同样的详细结构。
 
 ## 6. 语言
 按 `cfg.language`：en 英文；both 中英双语；默认中文。
