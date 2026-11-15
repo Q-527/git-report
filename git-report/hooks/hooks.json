@@ -1,0 +1,16 @@
+{
+  "description": "周五打开 git 仓库时，提醒用户生成本周工作周报（opt-in，可通过 .git-report.json 的 autoReminder 关闭）",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/friday-reminder.mjs"]
+          }
+        ]
+      }
+    ]
+  }
+}

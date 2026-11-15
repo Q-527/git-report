@@ -1,24 +1,48 @@
 ---
 name: daily
-description: 生成今日中文工作日报，基于当前或指定 git 仓库今天的提交记录
+description: 生成今日工作日报，支持 .git-report.json 配置、约定式提交解析、工单聚合、贡献者统计、中英双语与自动落盘
 disable-model-invocation: false
 ---
 
-帮用户生成"今日工作日报"。
+# 今日工作日报
 
-范围：今天 00:00 到当前时刻。除非用户明确给了别的日期区间，否则不要追问，直接用今天。
+## 0. 读取配置
+先用 Read 尝试读取当前仓库根目录的 `.git-report.json`；失败则用下方默认值。
+- `language`: `"zh"` | `"en"` | `"both"`，默认 `"zh"`
+- `groupBy`: `"type"` | `"ticket"` | `"author"` | `"chronological"`，默认 `"type"`
+- `excludeTypes`: 数组，默认 `["chore","style","docs"]`
+- `ticketPattern`: 正则字符串，默认 `"([A-Z]{2,}-\d+)"`
+- `emoji`: 布尔，默认 `true`
+- `members`: `{ git作者名: 显示名 }` 映射，默认 `{}`
+- `output`: `{ enabled, dir: ".reports", format: "md" }`，默认 `enabled=false`
 
-执行步骤：
-1. 确定仓库：默认当前目录。若用户给了路径，或说"所有项目 / 多个仓库"，收集这些路径，逐个用 `git -C <path> rev-parse --is-inside-work-tree` 校验是否 git 仓库。
-2. 取得今天日期：`date +%Y-%m-%d`。
-3. 对每个仓库拉取提交：
-   `git -C <path> log --since="<今天日期> 00:00" --until="now" --pretty=format:"%ad|%h|%an|%s" --date=short --stat`
-4. 若所有仓库都没有提交，如实告知"今日暂无提交记录"，绝不编造。
-5. 汇总成中文报告：
-   - 标题：工作日报（YYYY-MM-DD）
-   - 概览：共 N 个提交、M 个文件变更（多仓库聚合后）
-   - 按模块 / 功能分组的核心进展：把 "feat: 加登录" 这类原文翻成通顺中文叙述，不要逐条罗列 commit message
-   - 风险 / 卡点（如有关联的失败提交、WIP 半成品）
-   - 明日计划（简短，可选）
-6. 只基于真实 git 数据，禁止编造任何提交或进展。
-7. 输出后询问是否写入 `报告-YYYY-MM-DD.md`。
+## 1. 范围
+今天 00:00 到 now。`TODAY=$(date +%Y-%m-%d)`。除非用户明确给了别的区间，否则不追问，直接用今天。
+
+## 2. 收集数据
+默认当前目录；用户给路径或多个仓库时，逐个 `git -C <p> rev-parse --is-inside-work-tree` 校验。
+对每个仓库拉取：
+- 提交列表：`git -C <p> log --since="<TODAY> 00:00" --until="now" --pretty=format:"%h|%an|%ad|%s" --date=short`
+- 变更量：`git -C <p> log --since="<TODAY> 00:00" --until="now" --shortstat`
+聚合所有仓库。每条记录：hash、作者（用 `members` 映射成显示名，未映射则原样）、日期、message、变更文件数。
+若所有仓库都无提交：如实说"今日暂无提交记录"，绝不编造，结束。
+
+## 3. 解析与分组
+- 约定式提交：取 message 首个 `:` 前的词作为 type（feat/fix/docs/style/refactor/perf/test/build/ci/chore/revert）。命中已知 type 归入该类；否则归入"其他"。
+- 排除：type 出现在 `excludeTypes` 中则跳过（不计入报告）。
+- 工单聚合（`groupBy==="ticket"`）：用 `ticketPattern` 从 message 抽取工单号，按工单分组；无工单的归入"未关联工单"。
+- 作者分组（`groupBy==="author"`）：按作者（显示名）分组。
+- emoji：`emoji=true` 时各组标题加对应图标（✨feat 🐛fix 📝docs ♻️refactor ⚡perf ✅test 🔧chore 🔥revert/remove）。
+
+## 4. 生成报告
+把上面的结构化数据 + 配置（语言、分组方式）交给 `git-report:report-writer` 子代理生成最终通顺叙事；简单场景也可直接生成。
+报告含：标题（工作日报 YYYY-MM-DD）、概览（N 提交 / M 文件 / K 作者）、按组进展（通顺中文，不堆原文）、风险/卡点、明日计划（可选）。
+
+## 5. 语言
+按 `cfg.language`：`en` 出英文；`both` 先中文后英文；默认中文。
+
+## 6. 落盘
+若 `cfg.output.enabled`，用 Write 把报告写到 `<cfg.output.dir>/日报-YYYY-MM-DD.md`（目录不存在先建）。写完告知路径。
+
+## 7. 纪律
+只基于真实 git 数据，禁止编造任何提交、作者或进展。
