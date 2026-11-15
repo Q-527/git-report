@@ -26,7 +26,7 @@ disable-model-invocation: false
 - 若某条提交 diff 极大或 message 极长（疑似 squash 合并），温和提示"该提交可能由多次改动压缩而成，细节已合并"。
 
 ## 3. 解析与分组
-与 `daily` 相同：约定式 type 归类、excludeTypes 排除、ticket/author/chronological 分组、emoji 前缀。
+与 `daily` 相同：约定式 type 归类、excludeTypes 排除、ticket/author/chronological/**milestone** 分组、emoji 前缀。其中 `milestone` 分组调用 `scripts/milestones.mjs`（优先 git tag，无 tag 时退化到 commit message 里的 `vX.Y.Z`），适合"一月内多个版本里程碑"的月度复盘。
 
 ## 4. 贡献者统计（月报专属）
 额外统计并输出"本月贡献榜"：

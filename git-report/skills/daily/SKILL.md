@@ -9,7 +9,7 @@ disable-model-invocation: false
 ## 0. 读取配置
 先用 Read 尝试读取当前仓库根目录的 `.git-report.json`；失败则用下方默认值。
 - `language`: `"zh"` | `"en"` | `"both"`，默认 `"zh"`
-- `groupBy`: `"type"` | `"ticket"` | `"author"` | `"chronological"`，默认 `"type"`
+- `groupBy`: `"type"` | `"ticket"` | `"author"` | `"chronological"` | `"milestone"`，默认 `"type"`
 - `excludeTypes`: 数组，默认 `["chore","style","docs"]`
 - `excludePaths`: 数组，默认排除 `node_modules`/`dist`/`build`/`.next`/`out`/`vendor`/`target`/`*.min.js`/`*.min.css`/各类 `*.lock`（详见 `config` 技能）；用于让"变更文件数"更准确
 - `ticketPattern`: 正则字符串，默认 `"([A-Z]{2,}-\d+)"`
@@ -40,6 +40,9 @@ disable-model-invocation: false
 - 排除：type 出现在 `excludeTypes` 中则跳过（不计入报告）。
 - 工单聚合（`groupBy==="ticket"`）：用 `ticketPattern` 从 message 抽取工单号，按工单分组；无工单的归入"未关联工单"。若配置了 `ticketUrlTemplate`，把工单号渲染成 Markdown 链接；用户额外要求真实标题且环境可用 github MCP / gh 时再解析（见 `issues` 技能）。
 - 作者分组（`groupBy==="author"`）：按作者（显示名）分组。
+- 里程碑分组（`groupBy==="milestone"`）：运行
+  `node ${CLAUDE_PLUGIN_ROOT}/scripts/milestones.mjs --repo <p> --since "<范围起>" --until "<范围止>"`（可追加 `--pattern "<milestonePattern>"`），
+  按返回的 `milestones[].name` 分组每个提交。脚本优先用 git tag（取每个提交所属的最新 tag，未打标签的归"未打标签(最新)"）；无 tag 时退化到从 commit message 抽 `vX.Y.Z` 当里程碑边界；两者皆无会返回 `mode:"type"`，此时**回落到上面的 type 分组**，不会出错。
 - emoji：`emoji=true` 时各组标题加对应图标（✨feat 🐛fix 📝docs ♻️refactor ⚡perf ✅test 🔧chore 🔥revert/remove）。
 
 ## 4. 生成报告
