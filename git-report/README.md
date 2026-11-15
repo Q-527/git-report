@@ -15,6 +15,9 @@
 - **自动落盘**：可一键把报告写成 Markdown 文件
 - **周五自动提醒**：装好后在周五打开仓库，会温柔提示"要不要写周报"（可关）
 - **可配置**：`/git-report:init` 一键生成 `.git-report.json`，自定义以上所有行为
+- **Changelog / Release Notes**：从两个 tag 之间的提交，按 standard-version 风格生成 `CHANGELOG.md`
+- **反向写提交信息**：根据暂存区 diff，生成符合约定式规范的 commit message，确认后可直接提交
+- **去噪与提醒**：日报/周报/月报默认跳过合并提交噪声，并在有未提交改动时温和提醒
 
 ## 安装
 
@@ -41,8 +44,10 @@ claude plugin marketplace add https://github.com/Q-527/git-report
 | `/git-report:weekly` | 本周工作周报（本周一 00:00 起） |
 | `/git-report:monthly` | 本月工作月报（本月 1 号 00:00 起，含贡献者榜单） |
 | `/git-report:init` | 在当前仓库生成 `.git-report.json` 配置文件 |
+| `/git-report:changelog` | 生成 CHANGELOG / Release Notes（两个 tag 之间，约定式分组） |
+| `/git-report:commit` | 根据暂存区改动生成约定式提交信息，确认后可直接提交 |
 
-也支持自然语言触发，例如"帮我写个这周的周报""总结一下这个月干了啥"。
+也支持自然语言触发，例如"帮我写个这周的周报""总结一下这个月干了啥""给这次改动写个提交信息"。
 指定多个仓库时，直接说"把 A、B、C 三个项目这周的提交汇总一下"即可。
 
 ## 配置

@@ -20,6 +20,10 @@ disable-model-invocation: false
 聚合；每条记 hash、作者（members 映射）、日期、message、变更文件数。
 若全无提交：如实说"本月暂无提交记录"，不编造，结束。
 
+## 2.5 预处理（日报/周报/月报通用）
+- 收集前先 `git -C <p> status --porcelain` 检查未提交改动；若有，在报告开头温和提示"当前还有 N 个未提交改动，可能未计入本次报告"。
+- 默认跳过 message 以 `Merge ` 开头的合并提交（避免报告充满无意义噪声）；除非用户明确要求保留。
+
 ## 3. 解析与分组
 与 `daily` 相同：约定式 type 归类、excludeTypes 排除、ticket/author/chronological 分组、emoji 前缀。
 

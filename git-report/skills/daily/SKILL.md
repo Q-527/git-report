@@ -27,6 +27,10 @@ disable-model-invocation: false
 聚合所有仓库。每条记录：hash、作者（用 `members` 映射成显示名，未映射则原样）、日期、message、变更文件数。
 若所有仓库都无提交：如实说"今日暂无提交记录"，绝不编造，结束。
 
+## 2.5 预处理（日报/周报/月报通用）
+- 收集前先 `git -C <p> status --porcelain` 检查未提交改动；若有，在报告开头温和提示"当前还有 N 个未提交改动，可能未计入本次报告"。
+- 默认跳过 message 以 `Merge ` 开头的合并提交（避免报告充满无意义噪声）；除非用户明确要求保留。
+
 ## 3. 解析与分组
 - 约定式提交：取 message 首个 `:` 前的词作为 type（feat/fix/docs/style/refactor/perf/test/build/ci/chore/revert）。命中已知 type 归入该类；否则归入"其他"。
 - 排除：type 出现在 `excludeTypes` 中则跳过（不计入报告）。
