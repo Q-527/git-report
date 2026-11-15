@@ -187,11 +187,23 @@ const totals = {
   authors: [...authors],
 };
 
+// 按作者聚合（供 stats / team / 月报贡献榜复用）
+const authorMap = new Map();
+for (const c of commits) {
+  const a = authorMap.get(c.author) || { author: c.author, commits: 0, add: 0, del: 0, files: new Set() };
+  a.commits++; a.add += c.add; a.del += c.del;
+  for (const f of c.files) a.files.add(f.path);
+  authorMap.set(c.author, a);
+}
+const authorStats = [...authorMap.values()]
+  .map((a) => ({ author: a.author, commits: a.commits, add: a.add, del: a.del, files: a.files.size }))
+  .sort((x, y) => y.commits - x.commits);
+
 const filesList = [...fileTotals.keys()];
 
 process.stdout.write(
   JSON.stringify({
-    commits, files: filesArr, fileTypeBreakdown, byDay: byDayOut, totals,
+    commits, files: filesArr, fileTypeBreakdown, byDay: byDayOut, totals, authorStats,
     count: filesList.length, filesList, truncated,
   }, null, 2)
 );

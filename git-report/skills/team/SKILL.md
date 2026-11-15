@@ -11,14 +11,17 @@ disable-model-invocation: false
 ## 1. 范围
 默认本周一 00:00 到 now；用户给区间则按 `range` 解析。
 
-## 2. 按作者拆分
-对每个仓库（先 `git -C <p> rev-parse --is-inside-work-tree` 校验）：
-- 作者列表：`git -C <p> log --since="<S>" --until="<U>" --pretty=format:"%an" | sort -u`
-- 每位作者的提交数与列表：
-  `git -C <p> shortlog -sn --since="<S>" --until="<U>" --author="<作者>"`
-  `git -C <p> log --since="<S>" --until="<U>" --author="<作者>" --pretty=format:"%h|%s"`
-- 用 `members` 把 git 名映射成显示名；未映射则原样。
-- 变更文件数可用 `node ${CLAUDE_PLUGIN_ROOT}/scripts/changed-files.mjs --repo <p> --since "<S>" --until "<U>"` 的 `count` 作为仓库总量，按作者比例仅供参考（脚本不区分作者）。
+## 2. 按作者拆分（走富数据脚本）
+对每个仓库（先 `git -C <p> rev-parse --is-inside-work-tree` 校验），运行：
+`node ${CLAUDE_PLUGIN_ROOT}/scripts/repo-stats.mjs --repo <p> --since "<S>" --until "<U>"`
+读取返回 JSON 的 `authorStats[]`（已按提交数降序），每位作者直接含：
+- `author`：git 名（用 `members` 映射成显示名；未映射则原样）
+- `commits`：提交数
+- `add` / `del`：新增 / 删除行数
+- `files`：涉及文件数
+据此即可为每位贡献者写一段亮点，无需再逐人跑 `shortlog`。若想要额外交叉验证，可用 `git -C <p> shortlog -sn --since="<S>" --until="<U>"` 比对提交数。
+
+（旧版用 `changed-files.mjs` 的 `count` 只能给仓库总量、不区分作者，已弃用；富数据脚本一次给全。）
 
 ## 3. 生成报告
 交给 `git-report:report-writer` 子代理（或简单场景直接生成）。结构：

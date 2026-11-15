@@ -50,7 +50,7 @@ disable-model-invocation: false
 - emoji：`emoji=true` 时各组标题加对应图标（✨feat 🐛fix 📝docs ♻️refactor ⚡perf ✅test 🔧chore 🔥revert/remove）。
 
 ## 4. 生成报告（详细模式）
-把 §2 的完整 JSON + 配置（language / groupBy / detail / members / excludeTypes）交给 `git-report:report-writer` 子代理，要求按"详细模式"排版（见 report-writer 模板：概览 + 每日节奏表 + 提交明细 + 改动榜 + 类型分布 + 分组 + 风险 + 明日建议）。
+把 §2 的完整 JSON + 配置（language / groupBy / detail / members / excludeTypes）交给 `git-report:report-writer` 子代理，要求按"详细模式信息清单"排版（见 report-writer：概览 + 每日节奏表 + 提交明细 + 改动榜 + 类型分布 + 分组 + 风险/建议，按需取舍，非固定骨架）。
 `detail` 配置为 `normal` 时，子代理省略"每日节奏表 / 改动榜 / 类型分布"三张表，只保留概览 + 提交明细 + 分组 + 建议；默认 `rich` 出全量。
 简单场景也可直接生成，但须保持同样的详细结构。
 

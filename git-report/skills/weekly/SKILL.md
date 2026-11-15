@@ -36,7 +36,7 @@ disable-model-invocation: false
 与 `daily` 相同：约定式 type 归类、excludeTypes 排除、ticket/author/chronological/**milestone** 分组、emoji 前缀。其中 `milestone` 分组调用 `scripts/milestones.mjs`（优先 git tag，无 tag 时退化到 commit message 里的 `vX.Y.Z`），专门应对"一周内多次版本化提交、type 分组失效"的场景。
 
 ## 4. 生成报告（详细模式）
-把 §2 的完整 JSON（含可选 `prevTotals`）+ 配置（language / groupBy / detail / members / excludeTypes）交给 `git-report:report-writer` 子代理，要求按"详细模式"排版（见 report-writer 模板：概览 + 每日节奏表 + 提交明细 + 改动榜 + 类型分布 + 分组 + 风险 + 下周建议）。
+把 §2 的完整 JSON（含可选 `prevTotals`/`prevLabel`）+ 配置（language / groupBy / detail / members / excludeTypes）交给 `git-report:report-writer` 子代理，要求按"详细模式信息清单"排版（见 report-writer：概览 + 每日节奏表 + 提交明细 + 改动榜 + 类型分布 + 分组 + 风险/建议，按需取舍，非固定骨架）。
 `detail` 配置为 `normal` 时，子代理省略"每日节奏表 / 改动榜 / 类型分布"三张表，只保留概览 + 提交明细 + 分组 + 建议；默认 `rich` 出全量。
 简单场景也可直接生成，但须保持同样的详细结构。
 

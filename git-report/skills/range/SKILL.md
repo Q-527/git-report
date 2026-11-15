@@ -32,3 +32,11 @@ UNTIL="now"
 
 ## 3. 收集 / 解析 / 生成 / 落盘
 完全沿用 `daily` 对应章节，把其中的 `<TODAY> 00:00` / `<周一>` / `<月初>` 统一替换为上面算出的 `$SINCE` / `$UNTIL`，文件名用 `报告-<SINCE日期>_至_<UNTIL日期>.md`。
+
+### 3.1 环比上一区间（可选增强）
+若用户给的是明确区间（显式日期或"最近 N 天"这类可算出跨度的相对说法），再跑一次 repo-stats 取"紧邻本次区间之前、等长"的上一区间：
+- 跨度 = `$UNTIL` − `$SINCE`（天数或秒数）。
+- `SINCE2 = $SINCE − 跨度`，`UNTIL2 = $SINCE`。
+- `node ${CLAUDE_PLUGIN_ROOT}/scripts/repo-stats.mjs --repo <p> --since "<SINCE2>" --until "<UNTIL2>"`，取返回 `totals` 作 `prevTotals`，带 `prevLabel="上一区间"`。
+- 若区间无法换算（如纯相对含糊说法）或用户未要求对比，跳过 `prevTotals`，不报错。
+把 `prevTotals` + `prevLabel` 一并交给 report-writer 用于概览环比。

@@ -25,6 +25,11 @@ disable-model-invocation: false
 （changed-files.mjs 仍保留作兜底；repo-stats 不可用时退用它拿 count/files）
 把 `members` 映射套到 author 上；若 `totals.commits===0`：如实说"本月暂无提交记录"，不编造，结束。
 
+- **环比上月（增强项）**：再跑一次 repo-stats 取上一自然月区间
+  `--since "<上月1号> 00:00" --until "<本月1号> 00:00"`
+  （上月1号 = `date -d "last month" +%Y-%m-01`；本月1号 = `date +%Y-%m-01`），
+  取返回 `totals` 作为 `prevTotals`，并带 `prevLabel="上月"`；若 `prevTotals.commits===0` 记为"上月无提交"。把 `prevTotals` + `prevLabel` 一并交给 report-writer 用于概览环比。
+
 ## 2.5 预处理（日报/周报/月报通用）
 - 收集前先 `git -C <p> status --porcelain` 检查未提交改动；若有，在报告开头温和提示"当前还有 N 个未提交改动，可能未计入本次报告"。
 - 默认跳过 message 以 `Merge ` 开头的合并提交（避免报告充满无意义噪声）；除非用户明确要求保留。
@@ -34,15 +39,15 @@ disable-model-invocation: false
 与 `daily` 相同：约定式 type 归类、excludeTypes 排除、ticket/author/chronological/**milestone** 分组、emoji 前缀。其中 `milestone` 分组调用 `scripts/milestones.mjs`（优先 git tag，无 tag 时退化到 commit message 里的 `vX.Y.Z`），适合"一月内多个版本里程碑"的月度复盘。
 
 ## 4. 贡献者统计（月报专属）
-额外统计并输出"本月贡献榜"：
-- 每位作者（显示名）的提交数、变更文件数、涉及的主要模块/工单。
-- 用 `git -C <p> shortlog -sn --since="<月初>"` 交叉验证作者提交数。
+月报用 §2 富数据里的 `authorStats`（已含每位作者的 提交数/新增/删除/涉及文件数，按提交数降序）输出"本月贡献榜"。
+- 每位作者（显示名，用 `members` 映射）的提交数、代码量、涉及文件数、主要模块。
+- 可选：`git -C <p> shortlog -sn --since="<月初>"` 交叉验证作者提交数（与 `authorStats` 不一致时以 git 为准）。
 - 若仅一位作者则可省略榜单，只在概览点出。
 
 ## 5. 生成报告（详细模式）
-把 §2 的完整 JSON + 配置（language / groupBy / detail / members / excludeTypes）交给 `git-report:report-writer` 子代理，要求按"详细模式"排版（见 report-writer 模板：概览 + 每日节奏表 + 提交明细 + 改动榜 + 类型分布 + 分组 + 贡献者 + 风险 + 下月建议）。月报在"按组进展"之后额外插入"贡献者榜单"（每位作者提交数/新增/删除/主要模块），用 §4 的 shortlog 交叉验证。
+把 §2 的完整 JSON（含可选 `prevTotals`/`prevLabel` 与 `authorStats`）+ 配置（language / groupBy / detail / members / excludeTypes）交给 `git-report:report-writer` 子代理，要求按"详细模式信息清单"排版（见 report-writer：概览 + 每日节奏表 + 提交明细 + 改动榜 + 类型分布 + 分组 + 贡献者榜单 + 风险/建议，按需取舍，非固定骨架）。月报在分组之后插入"贡献者榜单"：按 `authorStats` 列出每位作者 提交数/新增/删除/主要模块（单人时可省略，概览点一句即可）。
 `detail` 配置为 `normal` 时，子代理省略"每日节奏表 / 改动榜 / 类型分布"三张表，只保留概览 + 提交明细 + 分组 + 贡献者 + 建议；默认 `rich` 出全量。
-简单场景也可直接生成，但须保持同样的详细结构。
+简单场景也可直接生成，但须保持同样的详细结构与不编造纪律。
 
 ## 6. 语言
 按 `cfg.language`：en 英文；both 中英双语；默认中文。

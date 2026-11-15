@@ -20,6 +20,14 @@ disable-model-invocation: false
 多仓库时分别取各自区间再合并。
 跳过合并提交（message 以 `Merge ` 开头）。
 
+## 2.5 改动统计（走富数据脚本）
+为让 Changelog 顶部多一行"这次发版到底动了多少"，再用脚本取区间汇总：
+1. 取两端日期：`FROM_DATE=$(git -C <p> show -s --format=%ad --date=short <from>)`，`TO_DATE=$(git -C <p> show -s --format=%ad --date=short <to 或 HEAD>)`。
+2. `node ${CLAUDE_PLUGIN_ROOT}/scripts/repo-stats.mjs --repo <p> --since "<FROM_DATE> 00:00" --until "<TO_DATE> 23:59"`。
+3. 读返回 `totals`（提交/文件/+/−行）与 `fileTypeBreakdown`（类型分布），在 Changelog 顶部"## [版本] - 日期"之下补一行汇总，例如：
+   `> 本次共 N 次提交，改动 M 个文件，+X / -Y 行；主要改动类型：JavaScript、CSS。`
+   无数据则跳过。多仓库时各自统计后合并展示。
+
 ## 3. 分组（standard-version 风格）
 按 type 归入固定区块，顺序如下：
 - ✨ Features → feat
