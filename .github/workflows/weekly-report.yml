@@ -1,0 +1,37 @@
+name: Weekly Report
+
+# 周五自动开本周周报 Issue。
+# 前置：仓库 Settings → Secrets → Actions 添加 ANTHROPIC_API_KEY（Claude 官方申请）。
+# 权限：本工作流已申请 issues:write 与 contents:read。
+on:
+  schedule:
+    # 每周五 09:00 UTC（北京/上海时间约 17:00）。按需改 cron。
+    - cron: "0 9 * * 5"
+  workflow_dispatch: {}   # 也支持在 Actions 页面手动触发
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  weekly:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate weekly report via Claude Code
+        uses: anthropics/claude-code-action@beta
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            按以下步骤操作：
+            1. 安装 git-report 插件：
+               /plugin marketplace add https://github.com/Q-527/git-report
+               /plugin install git-report
+            2. 生成本周周报：/git-report:weekly
+            3. 把生成的周报正文写入文件 weekly-report.md（纯 Markdown，不要包含任何 /命令 本身）。
+            4. 用 gh 开一个 Issue：
+               gh issue create --title "周报 $(date +%Y-%m-%d)" --body-file weekly-report.md
+            如果本仓库本周没有提交，仍开一个 Issue 注明"本周暂无提交记录"。
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

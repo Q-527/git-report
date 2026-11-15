@@ -25,6 +25,7 @@ disable-model-invocation: true
   "emoji": true,
   "members": {},
   "output": { "enabled": false, "dir": ".reports", "format": "md" },
+  "repos": [],
   "autoReminder": true
 }
 ```
@@ -42,4 +43,5 @@ disable-model-invocation: true
 | `output.enabled` | 布尔 | 是否自动把报告写成文件 |
 | `output.dir` | 路径 | 报告文件存放目录，默认 `.reports` |
 | `output.format` | `md` | 文件格式（当前仅 md） |
+| `repos` | 字符串数组 | 跨仓库看板（`/git-report:dashboard`）要扫描的仓库路径列表；为空则只用当前目录 |
 | `autoReminder` | 布尔 | 周五是否弹"要不要写周报"提醒（插件钩子读取） |

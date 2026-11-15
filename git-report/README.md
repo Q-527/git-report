@@ -22,6 +22,11 @@
 - **排除生成目录**：默认忽略 `node_modules`/`dist`/`build`/`vendor`/锁定文件等，文件统计更准（可配 `excludePaths`）
 - **PR 描述生成**：`/git-report:pr` 按当前分支相对 main/master 的提交生成标题/描述/测试要点
 - **安全优先**：纯本地、只读、显式确认——绝不自动 `git push`、绝不绕过钩子、绝不丢弃改动（见 SAFETY.md）
+- **团队周报**：`/git-report:team` 按贡献者拆分每个人的亮点与改动，适合小组复盘
+- **跨仓库看板**：`/git-report:dashboard` 一条命令总览所有项目本周进度（用 `repos` 配置多仓库）
+- **版本号建议**：`/git-report:version` 依据约定式提交自动建议 major/minor/patch，与 Changelog 联动
+- **提交节奏分析**：`/git-report:stats` 刻画最忙星期几/时段、最长连续提交 streak、人均产出
+- **GitHub Action 自动周报**：内置 `.github/workflows/weekly-report.yml`，周五自动开周报 Issue
 
 ## 安装
 
@@ -52,8 +57,12 @@ claude plugin marketplace add https://github.com/Q-527/git-report
 | `/git-report:commit` | 根据暂存区改动生成约定式提交信息，确认后可直接提交 |
 | `/git-report:range` | 按自定义时间区间生成进展报告（"上周""某天到某天""最近 N 天"） |
 | `/git-report:pr` | 根据当前分支相对 main/master 的提交生成 PR 描述（不自动推送） |
+| `/git-report:team` | 团队周报/区间报告，按贡献者拆分每个人亮点 |
+| `/git-report:dashboard` | 跨仓库看板，一条命令总览所有项目本周进度 |
+| `/git-report:version` | 依据约定式提交建议语义化版本号（major/minor/patch） |
+| `/git-report:stats` | 提交节奏分析：最忙星期几/时段、连续提交 streak、人均产出 |
 
-也支持自然语言触发，例如"帮我写个这周的周报""总结一下这个月干了啥""给这次改动写个提交信息""上个月 1 号到 15 号我干了啥""给这个分支写个 PR 描述"。
+也支持自然语言触发，例如"帮我写个这周的周报""总结一下这个月干了啥""给这次改动写个提交信息""上个月 1 号到 15 号我干了啥""给这个分支写个 PR 描述""把 A、B、C 三个项目这周的进度汇总一下""这次该发几版本""我最近三个月提交节奏怎么样"。
 指定多个仓库时，直接说"把 A、B、C 三个项目这周的提交汇总一下"即可。
 
 ## 配置
@@ -70,6 +79,7 @@ claude plugin marketplace add https://github.com/Q-527/git-report
   "emoji": true,
   "members": { "anann": "宝宝" },
   "output": { "enabled": false, "dir": ".reports", "format": "md" },
+  "repos": [],
   "autoReminder": true
 }
 ```
@@ -85,9 +95,20 @@ claude plugin marketplace add https://github.com/Q-527/git-report
 | `members` | `{ git名: 显示名 }` | 作者名映射 |
 | `output.enabled` | 布尔 | 是否自动写成文件 |
 | `output.dir` | 路径 | 报告存放目录 |
+| `repos` | 数组 | 跨仓库看板要扫描的仓库路径列表；为空则只用当前目录 |
 | `autoReminder` | 布尔 | 周五是否弹提醒 |
 
 **关闭周五提醒**：把 `autoReminder` 设为 `false`，或删掉配置文件（默认开启）。
+
+## GitHub Action 自动周报
+
+仓库内置 `.github/workflows/weekly-report.yml`：每周五 09:00 UTC（北京/上海约 17:00）自动开一个本周周报 Issue。开箱步骤：
+
+1. 在自己的项目仓库放一份同样的 workflow 文件（或 fork 本仓库的 `.github/`）。
+2. 仓库 **Settings → Secrets → Actions** 添加 `ANTHROPIC_API_KEY`（在 Claude 官方申请）。
+3. 工作流已申请 `issues: write` 与 `contents: read` 权限，无需额外配置。
+
+也可在 Actions 页面手动 `Run workflow` 立即试跑。改触发时间编辑文件里的 cron 表达式即可（[crontab.guru](https://crontab.guru) 可可视化调试）。
 
 ## 说明
 
