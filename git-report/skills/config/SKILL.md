@@ -20,6 +20,7 @@ disable-model-invocation: true
   "language": "zh",
   "groupBy": "type",
   "excludeTypes": ["chore", "style", "docs"],
+  "excludePaths": ["node_modules", "dist", "build", ".next", "out", "vendor", "target", "*.min.js", "*.min.css", "package-lock.json", "yarn.lock", "pnpm-lock.yaml", "*.lock"],
   "ticketPattern": "([A-Z]{2,}-\\d+)",
   "emoji": true,
   "members": {},
@@ -34,6 +35,7 @@ disable-model-invocation: true
 | `language` | `zh` / `en` / `both` | 报告语言，both 时先中文后英文 |
 | `groupBy` | `type` / `ticket` / `author` / `chronological` | 提交分组方式 |
 | `excludeTypes` | 字符串数组 | 这些约定式类型不计入报告（如杂务、样式、文档） |
+| `excludePaths` | 字符串数组 | 变更文件统计时排除的路径/目录/ glob（如 `node_modules`、`dist`、`*.lock`）；也支持在 `git-report:range` / 周期报告里让"变更文件数"更准确 |
 | `ticketPattern` | 正则字符串 | 从 commit message 抽取工单号的正则，用于按工单聚合 |
 | `emoji` | 布尔 | 分组标题是否加 emoji 图标 |
 | `members` | `{ git名: 显示名 }` | 把 git 作者名映射成更好看的中文名 |

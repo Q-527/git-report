@@ -16,13 +16,14 @@ disable-model-invocation: false
 默认当前目录；多仓库时逐个 `git -C <p> rev-parse --is-inside-work-tree` 校验。
 对每个仓库：
 - 提交列表：`git -C <p> log --since="<月初> 00:00" --until="now" --pretty=format:"%h|%an|%ad|%s" --date=short`
-- 变更量：`git -C <p> log --since="<月初> 00:00" --until="now" --shortstat`
+- 变更文件（已排除生成目录/锁定文件）：`node ${CLAUDE_PLUGIN_ROOT}/scripts/changed-files.mjs --repo <p> --since "<月初> 00:00" --until "now"`，读 `count` 与 `files`。
 聚合；每条记 hash、作者（members 映射）、日期、message、变更文件数。
 若全无提交：如实说"本月暂无提交记录"，不编造，结束。
 
 ## 2.5 预处理（日报/周报/月报通用）
 - 收集前先 `git -C <p> status --porcelain` 检查未提交改动；若有，在报告开头温和提示"当前还有 N 个未提交改动，可能未计入本次报告"。
 - 默认跳过 message 以 `Merge ` 开头的合并提交（避免报告充满无意义噪声）；除非用户明确要求保留。
+- 若某条提交 diff 极大或 message 极长（疑似 squash 合并），温和提示"该提交可能由多次改动压缩而成，细节已合并"。
 
 ## 3. 解析与分组
 与 `daily` 相同：约定式 type 归类、excludeTypes 排除、ticket/author/chronological 分组、emoji 前缀。

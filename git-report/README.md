@@ -18,6 +18,10 @@
 - **Changelog / Release Notes**：从两个 tag 之间的提交，按 standard-version 风格生成 `CHANGELOG.md`
 - **反向写提交信息**：根据暂存区 diff，生成符合约定式规范的 commit message，确认后可直接提交
 - **去噪与提醒**：日报/周报/月报默认跳过合并提交噪声，并在有未提交改动时温和提醒
+- **自定义时间区间**：`/git-report:range` 支持"上周""2026-01-01 到 2026-01-15""最近 7 天"等任意区间
+- **排除生成目录**：默认忽略 `node_modules`/`dist`/`build`/`vendor`/锁定文件等，文件统计更准（可配 `excludePaths`）
+- **PR 描述生成**：`/git-report:pr` 按当前分支相对 main/master 的提交生成标题/描述/测试要点
+- **安全优先**：纯本地、只读、显式确认——绝不自动 `git push`、绝不绕过钩子、绝不丢弃改动（见 SAFETY.md）
 
 ## 安装
 
@@ -46,8 +50,10 @@ claude plugin marketplace add https://github.com/Q-527/git-report
 | `/git-report:init` | 在当前仓库生成 `.git-report.json` 配置文件 |
 | `/git-report:changelog` | 生成 CHANGELOG / Release Notes（两个 tag 之间，约定式分组） |
 | `/git-report:commit` | 根据暂存区改动生成约定式提交信息，确认后可直接提交 |
+| `/git-report:range` | 按自定义时间区间生成进展报告（"上周""某天到某天""最近 N 天"） |
+| `/git-report:pr` | 根据当前分支相对 main/master 的提交生成 PR 描述（不自动推送） |
 
-也支持自然语言触发，例如"帮我写个这周的周报""总结一下这个月干了啥""给这次改动写个提交信息"。
+也支持自然语言触发，例如"帮我写个这周的周报""总结一下这个月干了啥""给这次改动写个提交信息""上个月 1 号到 15 号我干了啥""给这个分支写个 PR 描述"。
 指定多个仓库时，直接说"把 A、B、C 三个项目这周的提交汇总一下"即可。
 
 ## 配置
@@ -59,6 +65,7 @@ claude plugin marketplace add https://github.com/Q-527/git-report
   "language": "zh",
   "groupBy": "type",
   "excludeTypes": ["chore", "style", "docs"],
+  "excludePaths": ["node_modules", "dist", "build", ".next", "out", "vendor", "target", "*.min.js", "*.min.css", "package-lock.json", "yarn.lock", "pnpm-lock.yaml", "*.lock"],
   "ticketPattern": "([A-Z]{2,}-\\d+)",
   "emoji": true,
   "members": { "anann": "宝宝" },
@@ -72,6 +79,7 @@ claude plugin marketplace add https://github.com/Q-527/git-report
 | `language` | `zh` / `en` / `both` | 报告语言，`both` 先中文后英文 |
 | `groupBy` | `type` / `ticket` / `author` / `chronological` | 提交分组方式 |
 | `excludeTypes` | 数组 | 这些约定式类型不计入报告 |
+| `excludePaths` | 数组 | 变更文件统计时排除的路径/目录/glob（如 `node_modules`、`dist`、`*.lock`） |
 | `ticketPattern` | 正则字符串 | 从 commit message 抽取工单号 |
 | `emoji` | 布尔 | 分组标题是否加 emoji |
 | `members` | `{ git名: 显示名 }` | 作者名映射 |
@@ -85,6 +93,14 @@ claude plugin marketplace add https://github.com/Q-527/git-report
 
 - 报告只基于真实 git 数据生成，没有提交就如实说"暂无记录"，绝不编造。
 - 报告执笔由一个内置子代理 `git-report:report-writer` 完成，主模型更轻、输出更稳定。
+
+## 安全保证
+
+git-report 是**只读 + 显式确认**的插件，详见仓库根 `SAFETY.md`。要点：
+
+- 不自动 `git push`、不创建/强推分支、不 `git reset --hard`、不丢弃未提交改动。
+- `commit` 只用已暂存内容、不绕过 pre-commit 钩子；`pr` 只生成文本、不代为创建 PR。
+- 不联网、不调用 MCP、不上传你的代码或报告。
 
 ## 许可证
 
