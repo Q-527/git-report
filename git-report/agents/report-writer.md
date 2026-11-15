@@ -17,6 +17,7 @@ model: inherit
   - `byDay`：每天 `{commits, add, del, files}`
   - `totals`：`{commits, files, add, del, authors[]}`
 - 分组方式：type / ticket / author / chronological / milestone
+- 可选 `prevTotals`：上周同区间的 `{commits, files, add, del}`（用于环比；没有则省略该段）
 - 输出语言：zh / en / both
 - `detail`：`rich`（默认，出全量）/ `normal`（省略三张表）
 - 是否落盘及路径（可选）
@@ -42,6 +43,7 @@ model: inherit
 - 代码量：新增 +{add} 行 / 删除 -{del} 行 / 净 {add-del} 行
 - 贡献者：{authors.length} 人（{authors 列表}）
 - 跨度：{起} ~ {止}
+- 环比上周：提交 {+/-n} / 新增 {+/-n} 行 / 删除 {+/-n} 行（若 `prevTotals` 不存在或上周无提交，写"上周无数据，暂无对比"）
 
 ## 二、每日节奏
 | 日期 | 提交 | 新增 | 删除 | 涉及文件 |

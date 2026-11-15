@@ -24,6 +24,7 @@ disable-model-invocation: false
 - `byDay`：每天 提交数/新增/删除/涉及文件数
 - `totals`：commits/files/add/del/authors
 （changed-files.mjs 仍保留作兜底；repo-stats 不可用时退用它拿 count/files）
+- **环比上周（增强项）**：再跑一次 repo-stats 取上一周区间 `--since "<上周一> 00:00" --until "<本周一> 00:00"`（上周一 = `date -d "last monday - 7 days" +%Y-%m-%d`），取返回 `totals` 作为 `prevTotals`；若 `prevTotals.commits===0` 则记为"上周无提交"。把 `prevTotals` 一并交给 report-writer 用于概览环比。
 把 `members` 映射套到 author 上；若 `totals.commits===0`：如实说"本周暂无提交记录"，不编造，结束。
 
 ## 2.5 预处理（日报/周报/月报通用）
@@ -35,7 +36,7 @@ disable-model-invocation: false
 与 `daily` 相同：约定式 type 归类、excludeTypes 排除、ticket/author/chronological/**milestone** 分组、emoji 前缀。其中 `milestone` 分组调用 `scripts/milestones.mjs`（优先 git tag，无 tag 时退化到 commit message 里的 `vX.Y.Z`），专门应对"一周内多次版本化提交、type 分组失效"的场景。
 
 ## 4. 生成报告（详细模式）
-把 §2 的完整 JSON + 配置（language / groupBy / detail / members / excludeTypes）交给 `git-report:report-writer` 子代理，要求按"详细模式"排版（见 report-writer 模板：概览 + 每日节奏表 + 提交明细 + 改动榜 + 类型分布 + 分组 + 风险 + 下周建议）。
+把 §2 的完整 JSON（含可选 `prevTotals`）+ 配置（language / groupBy / detail / members / excludeTypes）交给 `git-report:report-writer` 子代理，要求按"详细模式"排版（见 report-writer 模板：概览 + 每日节奏表 + 提交明细 + 改动榜 + 类型分布 + 分组 + 风险 + 下周建议）。
 `detail` 配置为 `normal` 时，子代理省略"每日节奏表 / 改动榜 / 类型分布"三张表，只保留概览 + 提交明细 + 分组 + 建议；默认 `rich` 出全量。
 简单场景也可直接生成，但须保持同样的详细结构。
 
